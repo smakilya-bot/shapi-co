@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e3a8a">
+    <title>Shapi&CO - Запись пациентов</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--gray-900);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .login-box {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 420px;
+        }
+        
+        .shark-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(30,58,138,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .shark-logo svg { width: 70px; height: 70px; }
+        
+        .login-box h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        
+        .login-box .subtitle {
+            text-align: center;
+            color: var(--gray-700);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        
+        .form-group { margin-bottom: 1.25rem; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: var(--gray-100);
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(30,58,138,0.3);
+        }
+        
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30,58,138,0.4);
+        }
+        
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-role {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 0.375rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 0.625rem 1.25rem;
+            border: 2px solid var(--gray-200);
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.75rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .calendar-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15,23,42,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-close {
+            background: var(--gray-100);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+        
+        .modal-body { padding: 0 1.5rem 1.5rem; }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .main-content { padding: 1rem; }
+        }
+        
+        .file-upload {
+            border: 2px dashed var(--gray-200);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            background: var(--gray-100);
+        }
+        
+        .file-upload input { display: none; }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid var(--gray-200);
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-item .remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .fc-event {
+            cursor: pointer;
+            border-radius: 8px !important;
+            padding: 4px 8px !important;
+            font-weight: 600 !important;
+            border: none !important;
+        }
+        
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .toast {
+            background: white;
+            color: var(--gray-900);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            border-left: 4px solid var(--success);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toast.error { border-left-color: var(--danger); }
+        
+        .patients-section {
+            margin-top: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .patients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .patient-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--gray-100);
+        }
+        
+        .patient-card:hover {
+            border-color: var(--primary-light);
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .patient-name {
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+        }
+        
+        .patient-info {
+            color: var(--gray-700);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .patient-doctor {
+            display: inline-block;
+            background: var(--primary-light);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-panel {
+            display: none;
+            margin-top: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .doctors-list { margin-top: 1rem; }
+        
+        .doctor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sync-status {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            display: none;
+        }
+        
+        .sync-status.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <div class="shark-logo">
+                <svg viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1e3a8a"/>
+                            <stop offset="100%" style="stop-color:#3b82f6"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="45" fill="url(#grad1)"/>
+                    <path d="M30 40 Q50 15 70 40 Q78 48 70 58 Q65 68 50 72 Q35 68 30 58 Q22 48 30 40" fill="#60a5fa"/>
+                    <path d="M50 15 L45 5 L55 5 Z" fill="#0f172a"/>
+                    <circle cx="38" cy="45" r="4" fill="white"/>
+                    <circle cx="39" cy="45" r="2" fill="black"/>
+                    <path d="M32 52 L36 68 L40 54 L44 70 L48 54 L52 70 L56 54 L60 68 L64 52" fill="white" stroke="white" stroke-width="1.5"/>
+                    <path d="M68 48 Q72 52 68 56" fill="none" stroke="#1e40af" stroke-width="2"/>
+                    <path d="M72 46 Q76 52 72 58" fill="none" stroke="#1e40af" stroke-width="2"/>
+                </svg>
+            </div>
+            <h1>Shapi&CO</h1>
+            <p class="subtitle">Стоматологическая клиника</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="username" required placeholder="Введите логин">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" required placeholder="Введите пароль">
+                </div>
+                <button type="submit" class="btn">Войти в систему</button>
+            </form>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #eff6ff; border-radius: 12px; font-size: 0.875rem;">
+                <strong>Админ:</strong> admin / admin<br>
+                <strong>Врачи:</strong> doctor1 / doctor1, doctor2 / doctor2, и т.д.
+            </div>
+        </div>
+    </div>
+
+
+    <div class="app-container" id="appContainer">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 100 100" style="width: 28px; height: 28px;">
+                        <circle cx="50" cy="50" r="45" fill="white"/>
+                        <path d="M30 40 Q50 15 70 40 Q78 48 70 58 Q65 68 50 72 Q35 68 30 58 Q22 48 30 40" fill="#1e3a8a"/>
+                        <path d="M50 15 L45 5 L55 5 Z" fill="#0f172a"/>
+                        <circle cx="38" cy="45" r="4" fill="white"/>
+                        <circle cx="39" cy="45" r="2" fill="black"/>
+                        <path d="M32 52 L36 68 L40 54 L44 70 L48 54 L52 70 L56 54 L60 68 L64 52" fill="white" stroke="white" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                Shapi&CO
+            </div>
+            <div class="user-info">
+                <span id="currentUserName"></span>
+                <span class="user-role" id="currentUserRole"></span>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выход
+                </button>
+            </div>
+        </header>
+
+
+        <div class="sync-status" id="syncStatus">
+            <i class="fas fa-sync"></i> Синхронизация...
+        </div>
+
+
+        <main class="main-content">
+            <div class="toolbar">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">Все записи</button>
+                    <button class="filter-btn" data-filter="my">Мои записи</button>
+                    <button class="filter-btn" data-room="1">Кабинет 1</button>
+                    <button class="filter-btn" data-room="2">Кабинет 2</button>
+                    <button class="filter-btn" data-room="3">Кабинет 3</button>
+                </div>
+                <button class="btn-primary" onclick="openModal()">
+                    <i class="fas fa-plus"></i> Новая запись
+                </button>
+            </div>
+
+
+            <div class="calendar-container">
+                <div id="calendar"></div>
+            </div>
+
+
+            <div class="patients-section" id="patientsSection">
+                <h2><i class="fas fa-users"></i> База пациентов</h2>
+                <input type="text" class="search-box" id="patientSearch" placeholder="Поиск по ФИО или телефону...">
+                <div class="patients-grid" id="patientsGrid"></div>
+            </div>
+
+
+            <div class="admin-panel" id="adminPanel">
+                <h2><i class="fas fa-user-md"></i> Управление врачами</h2>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <input type="text" id="newDoctorName" placeholder="ФИО врача">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="newDoctorLogin" placeholder="Логин">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="newDoctorPassword" placeholder="Пароль">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn" onclick="addDoctor()" style="width: auto; padding: 0.875rem 1.5rem;">Добавить</button>
+                    </div>
+                </div>
+                <div class="doctors-list" id="doctorsList"></div>
+            </div>
+        </main>
+    </div>
+
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Новая запись</h2>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <input type="hidden" id="appointmentId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Фамилия *</label>
+                            <input type="text" id="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Имя *</label>
+                            <input type="text" id="firstName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Отчество</label>
+                            <input type="text" id="middleName">
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон *</label>
+                            <input type="tel" id="phone" required placeholder="+7 (___) ___-__-__">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Дата и время *</label>
+                            <input type="datetime-local" id="dateTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Кабинет *</label>
+                            <select id="room" required>
+                                <option value="1">Кабинет 1</option>
+                                <option value="2">Кабинет 2</option>
+                                <option value="3">Кабинет 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Комментарий / Лечение</label>
+                        <textarea id="comment" rows="3" placeholder="Описание лечения, заметки..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Фото и снимки</label>
+                        <div class="file-upload" onclick="document.getElementById('files').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: var(--primary-light); margin-bottom: 0.75rem;"></i>
+                            <p style="font-weight: 600;">Нажмите или перетащите файлы сюда</p>
+                            <input type="file" id="files" multiple accept="image/*,.pdf" onchange="handleFiles(this.files)">
+                        </div>
+                        <div class="preview-grid" id="previewGrid"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Отмена</button>
+                <button type="button" class="btn-danger" id="deleteBtn" onclick="deleteAppointment()" style="display: none;">Удалить</button>
+                <button type="button" class="btn" onclick="saveAppointment()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="toast-container" id="toastContainer"></div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

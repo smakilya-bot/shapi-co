@@ -1,0 +1,22 @@
+{
+    "name": "Shapi&CO - Запись пациентов",
+    "short_name": "Shapi&CO",
+    "description": "Система учета записей пациентов стоматологической клиники Shapi&CO",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1e3a8a",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231e3a8a'/%3E%3Cpath d='M30 40 Q50 15 70 40 Q78 48 70 58 Q65 68 50 72 Q35 68 30 58 Q22 48 30 40' fill='%2360a5fa'/%3E%3Cpath d='M50 15 L45 5 L55 5 Z' fill='%230f172a'/%3E%3Ccircle cx='38' cy='45' r='4' fill='white'/%3E%3Ccircle cx='39' cy='45' r='2' fill='black'/%3E%3Cpath d='M32 52 L36 68 L40 54 L44 70 L48 54 L52 70 L56 54 L60 68 L64 52' fill='white' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%231e3a8a'/%3E%3Cpath d='M30 40 Q50 15 70 40 Q78 48 70 58 Q65 68 50 72 Q35 68 30 58 Q22 48 30 40' fill='%2360a5fa'/%3E%3Cpath d='M50 15 L45 5 L55 5 Z' fill='%230f172a'/%3E%3Ccircle cx='38' cy='45' r='4' fill='white'/%3E%3Ccircle cx='39' cy='45' r='2' fill='black'/%3E%3Cpath d='M32 52 L36 68 L40 54 L44 70 L48 54 L52 70 L56 54 L60 68 L64 52' fill='white' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ]
+}
