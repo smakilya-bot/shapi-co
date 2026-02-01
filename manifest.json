@@ -2,7 +2,7 @@
     "name": "Shapi&CO - Запись пациентов",
     "short_name": "Shapi&CO",
     "description": "Система учета записей пациентов стоматологической клиники Shapi&CO",
-    "start_url": "/",
+    "start_url": "/shapi-co/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#1e3a8a",
@@ -19,4 +19,5 @@
             "type": "image/svg+xml"
         }
     ]
+
 }
